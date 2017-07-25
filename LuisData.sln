@@ -5,6 +5,10 @@ VisualStudioVersion = 15.0.26430.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LuisData", "LuisData\LuisData.csproj", "{BB5184CD-4394-4621-9320-74D9E45B042F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NameGenerator", "NameGenerator\NameGenerator.csproj", "{BB9FF5A8-2D71-45CD-8E73-44CD04C51EC9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Serializer", "Json\Serializer.csproj", "{2B6C0A9B-A0E8-428C-A3E1-F06A35AF7576}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +19,14 @@ Global
 		{BB5184CD-4394-4621-9320-74D9E45B042F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BB5184CD-4394-4621-9320-74D9E45B042F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BB5184CD-4394-4621-9320-74D9E45B042F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BB9FF5A8-2D71-45CD-8E73-44CD04C51EC9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BB9FF5A8-2D71-45CD-8E73-44CD04C51EC9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BB9FF5A8-2D71-45CD-8E73-44CD04C51EC9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BB9FF5A8-2D71-45CD-8E73-44CD04C51EC9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2B6C0A9B-A0E8-428C-A3E1-F06A35AF7576}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2B6C0A9B-A0E8-428C-A3E1-F06A35AF7576}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2B6C0A9B-A0E8-428C-A3E1-F06A35AF7576}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2B6C0A9B-A0E8-428C-A3E1-F06A35AF7576}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

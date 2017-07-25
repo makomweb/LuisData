@@ -3,7 +3,7 @@ using System;
 using System.IO;
 using System.Text;
 
-namespace GenerateLuisData
+namespace Serializer
 {
     public class Json
     {

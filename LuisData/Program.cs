@@ -23,7 +23,13 @@ namespace GenerateLuisData
             return File.OpenWrite(path);
         }
 
-        private static IEnumerable<string> GetNames() => GetLines(@"../../names.dat");
+        private static IEnumerable<string> GetNames()
+        {
+            var names = GetLines(@"../../names.dat").ToList();
+            names.AddRange(GetLines(@"../../advanced-names.dat"));
+            return names;
+
+        }
         private static IEnumerable<string> GetBooks() => GetLines(@"../../books.dat");
         private static IEnumerable<string> GetMovies() => GetLines(@"../../movies.dat");
 
@@ -134,7 +140,7 @@ namespace GenerateLuisData
                 return new LuisDoc()
                 {
                     luis_schema_version = "2.1.0",
-                    versionId = "0.1.1",
+                    versionId = "0.1.2",
                     culture = "en-us",
                     desc = "training data",
                     name = "my-radish",

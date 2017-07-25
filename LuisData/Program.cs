@@ -9,21 +9,24 @@ namespace GenerateLuisData
     {
         static void Main(string[] args)
         {
-            var doc = Generate(_intentSynonyms, _entityExamples);
-            
-            var folder = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-            var fileName = $"luis-training-data-v{doc.versionId}.json";
-            var path = Path.Combine(folder, fileName);
-            var file = File.OpenWrite(path);
-            
+            var doc = Generate(_intentSynonyms);
+            var file = OpenFile(doc);
             new Json().Serialize(file, doc);
         }
 
-        public static IEnumerable<string> GetNames() => GetLines(@"../../names.dat");
-        public static IEnumerable<string> GetBooks() => GetLines(@"../../books.dat");
-        public static IEnumerable<string> GetMovies() => GetLines(@"../../movies.dat");
+        private static FileStream OpenFile(LuisDoc doc)
+        {
+            var folder = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            var fileName = $"luis-training-data-v{doc.versionId}.json";
+            var path = Path.Combine(folder, fileName);
+            return File.OpenWrite(path);
+        }
 
-        public static IEnumerable<string> GetLines(string path)
+        private static IEnumerable<string> GetNames() => GetLines(@"../../names.dat");
+        private static IEnumerable<string> GetBooks() => GetLines(@"../../books.dat");
+        private static IEnumerable<string> GetMovies() => GetLines(@"../../movies.dat");
+
+        private static IEnumerable<string> GetLines(string path)
         {
             var file = File.OpenRead(path);
             using (var reader = new StreamReader(file))
@@ -36,7 +39,7 @@ namespace GenerateLuisData
             }
         }
 
-        public static class Intents
+        private static class Intents
         {
             public static string Call = "call";
             public static string Message = "message";
@@ -46,7 +49,7 @@ namespace GenerateLuisData
             public static List<string> All = new List<string> { Call, Message, Read, Watch };
         }
 
-        public static class Entities
+        private static class Entities
         {
             public static string Contact = "contact";
             public static string Book = "book";
@@ -55,13 +58,11 @@ namespace GenerateLuisData
             public static List<string> All = new List<string> { Contact, Book, Movie };
         }
 
-        public class IntentSynonyms : Dictionary<string, string> { }
+        private class IntentSynonyms : Dictionary<string, string> { }
 
-        public class EntityExamples : Dictionary<string, string> { }
+        private class EntityExamples : Dictionary<string, string> { }
 
         private static IntentSynonyms _intentSynonyms = new IntentSynonyms();
-
-        private static EntityExamples _entityExamples = new EntityExamples();
 
         private static List<string> _patterns = new List<string>();
 
@@ -75,50 +76,30 @@ namespace GenerateLuisData
             _intentSynonyms.Add("research", Intents.Read);
             _intentSynonyms.Add("watch", Intents.Watch);
 
-            var names = GetNames();
-            foreach (var n in names)
-            {
-                _entityExamples.Add(n, Entities.Contact);
-            }
-
-            var books = GetBooks();
-            foreach( var b in books)
-            {
-                _entityExamples.Add(b, Entities.Book);
-            }
-
-            var movies = GetMovies();
-            foreach (var m in movies)
-            {
-                _entityExamples.Add(m, Entities.Movie);
-            }
-
             //Pattern.Add("{intent} {entity}");
             //Pattern.Add("{intent} {entity} {time}");
             //Pattern.Add("{intent} {entity}");
         }
 
-        private static LuisDoc Generate(IntentSynonyms synonyms, EntityExamples examples)
+        private static LuisDoc Generate(IntentSynonyms synonyms)
         {
             var names = GetNames();
             var books = GetBooks();
             var movies = GetMovies();
-            var generator = new Generator(_intentSynonyms, _entityExamples, names, movies, books);
+            var generator = new Generator(_intentSynonyms, names, movies, books);
             return generator.Create();
         }
 
         private class Generator
         {
             private readonly IntentSynonyms _synonyms;
-            private readonly EntityExamples _example;
             private readonly IEnumerable<string> _names;
             private readonly IEnumerable<string> _movies;
             private readonly IEnumerable<string> _books;
 
-            public Generator(IntentSynonyms synonyms, EntityExamples examples, IEnumerable<string> names, IEnumerable<string> movies, IEnumerable<string> books)
+            public Generator(IntentSynonyms synonyms, IEnumerable<string> names, IEnumerable<string> movies, IEnumerable<string> books)
             {
                 _synonyms = synonyms;
-                _example = examples;
                 _names = names;
                 _movies = movies;
                 _books = books;

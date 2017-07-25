@@ -34,16 +34,35 @@ namespace GenerateLuisData
             public static List<string> All = new List<string> { Contact, Book, Movie };
         }
 
-
-        private IEnumerable<string> Patterns()
+        private static class Noise
         {
-            var patterns = new List<string>();
+            public static string Preface = "preface";
+            public static string Middle = "middle";
+            public static string Trailer = "trailer";
+        }
 
-            //Pattern.Add("{intent} {entity}");
-            //Pattern.Add("{intent} {entity} {time}");
-            //Pattern.Add("{intent} {entity}");
+        private static class Patterns
+        {
+            public static string IntentEntity = "{intent} {entity}";
+            public static string IntentEntityTrailer = "{intent} {entity} {trailer}";
+            public static string PrefaceIntentEntity = "{preface} {intent} {entity}";
+            public static string PrefaceIntentEntityTrailer = "{preface} {intent} {entity} {trailer}";
+            public static string IntentMiddleEntity = "{intent} {middle} {entity}";
+            public static string IntentMiddleEntityTrailer = "{intent} {middle} {entity} {trailer}";
+            public static string PrefaceIntentMiddleEntity = "{preface} {intent} {middle} {entity}";
+            public static string PrefaceIntentMiddleEntityTrailer = "{preface} {intent} {middle} {entity} {trailer}";
 
-            return patterns;
+            public static List<string> All = new List<string>
+            {
+                IntentEntity,
+                IntentEntityTrailer,
+                PrefaceIntentEntity,
+                PrefaceIntentEntityTrailer,
+                IntentMiddleEntity,
+                IntentMiddleEntityTrailer,
+                PrefaceIntentMiddleEntity,
+                PrefaceIntentMiddleEntityTrailer
+            };
         }
 
         private class IntentSynonyms : Dictionary<string, string> { }
@@ -60,6 +79,35 @@ namespace GenerateLuisData
                 { "research", Intents.Read },
                 { "watch", Intents.Watch },
                 { "see", Intents.Watch }
+            };
+
+            var noise = new Dictionary<string, string>
+            {
+                { "Make", Noise.Preface },
+                { "Do", Noise.Preface },
+                { "Finish", Noise.Preface },
+                { "Set", Noise.Preface },
+                { "Complete", Noise.Preface },
+                { "Start", Noise.Preface },
+                { "Continue", Noise.Preface },
+                { "Make first", Noise.Preface },
+                { "Do lots of", Noise.Preface },
+                { "Prepare finish", Noise.Preface },
+                { "Set this ", Noise.Preface },
+                { "Complete next", Noise.Preface },
+                { "Start second iteration", Noise.Preface },
+                { "Put more effort into", Noise.Preface },
+
+                {"to", Noise.Middle },
+                {"with", Noise.Middle },
+                {"by", Noise.Middle },
+                {"with", Noise.Middle },
+                {"together with", Noise.Middle },
+
+                { "again", Noise.Trailer },
+                { "tomorrow", Noise.Trailer },
+                { "today", Noise.Trailer },
+                { "first", Noise.Trailer },
             };
 
             var names = GetNames();

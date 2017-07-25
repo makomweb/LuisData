@@ -8,42 +8,11 @@ namespace GenerateLuisData
 {
     public class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
-            var doc = Generate(_intentSynonyms);
+            var doc = Generate();
             var file = OpenFile(doc);
-            new Json().Serialize(file, doc);
-        }
-
-        private static FileStream OpenFile(LuisDoc doc)
-        {
-            var folder = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-            var fileName = $"luis-training-data-v{doc.versionId}.json";
-            var path = Path.Combine(folder, fileName);
-            return File.OpenWrite(path);
-        }
-
-        private static IEnumerable<string> GetNames()
-        {
-            var names = GetLines(@"../../names.dat").ToList();
-            names.AddRange(GetLines(@"../../advanced-names.dat"));
-            return names;
-
-        }
-        private static IEnumerable<string> GetBooks() => GetLines(@"../../books.dat");
-        private static IEnumerable<string> GetMovies() => GetLines(@"../../movies.dat");
-
-        private static IEnumerable<string> GetLines(string path)
-        {
-            var file = File.OpenRead(path);
-            using (var reader = new StreamReader(file))
-            {
-                string line = string.Empty;
-                while ((line = reader.ReadLine()) != null)
-                {
-                    yield return line;
-                }
-            }
+            SaveFile(doc, file);
         }
 
         private static class Intents
@@ -65,90 +34,119 @@ namespace GenerateLuisData
             public static List<string> All = new List<string> { Contact, Book, Movie };
         }
 
-        private class IntentSynonyms : Dictionary<string, string> { }
 
-        private class EntityExamples : Dictionary<string, string> { }
-
-        private static IntentSynonyms _intentSynonyms = new IntentSynonyms();
-
-        private static List<string> _patterns = new List<string>();
-
-        static Program()
+        private IEnumerable<string> Patterns()
         {
-            _intentSynonyms.Add("call", Intents.Call);
-            _intentSynonyms.Add("email", Intents.Message);
-            _intentSynonyms.Add("message", Intents.Message);
-            _intentSynonyms.Add("dial", Intents.Call);
-            _intentSynonyms.Add("read", Intents.Read);
-            _intentSynonyms.Add("research", Intents.Read);
-            _intentSynonyms.Add("watch", Intents.Watch);
+            var patterns = new List<string>();
 
             //Pattern.Add("{intent} {entity}");
             //Pattern.Add("{intent} {entity} {time}");
             //Pattern.Add("{intent} {entity}");
+
+            return patterns;
         }
 
-        private static LuisDoc Generate(IntentSynonyms synonyms)
+        private class IntentSynonyms : Dictionary<string, string> { }
+
+        private static LuisDoc Generate()
         {
+            var intentSynonyms = new IntentSynonyms
+            {
+                { "call", Intents.Call },
+                { "dial", Intents.Call },
+                { "email", Intents.Message },
+                { "message", Intents.Message },
+                { "read", Intents.Read },
+                { "research", Intents.Read },
+                { "watch", Intents.Watch },
+                { "see", Intents.Watch }
+            };
+
             var names = GetNames();
             var books = GetBooks();
             var movies = GetMovies();
-            var generator = new Generator(_intentSynonyms, names, movies, books);
-            return generator.Create();
+
+            return Generate(intentSynonyms, names, movies, books);
         }
 
-        private class Generator
+        private static LuisDoc Generate(IntentSynonyms synonyms, IEnumerable<string> names, IEnumerable<string> movies, IEnumerable<string> books)
         {
-            private readonly IntentSynonyms _synonyms;
-            private readonly IEnumerable<string> _names;
-            private readonly IEnumerable<string> _movies;
-            private readonly IEnumerable<string> _books;
-
-            public Generator(IntentSynonyms synonyms, IEnumerable<string> names, IEnumerable<string> movies, IEnumerable<string> books)
+            return new LuisDoc()
             {
-                _synonyms = synonyms;
-                _names = names;
-                _movies = movies;
-                _books = books;
-            }
+                luis_schema_version = "2.1.0",
+                versionId = "0.1.2",
+                culture = "en-us",
+                desc = "training data",
+                name = "my-radish",
+                entities = Entities.All.Select(o => new Entity { name = o }).ToList(),
+                intents = Intents.All.Select(o => new Intent { name = o }).ToList(),
+                utterances = CreateUtterances(synonyms, names, movies, books)
+            };
+        }
 
-            private IEnumerable<Utterance> CreateUtterances(string intentId, IEnumerable<string> entities, string entityType)
+        private static IEnumerable<string> GetNames()
+        {
+            var names = GetLines(@"../../names.dat").ToList();
+            names.AddRange(GetLines(@"../../advanced-names.dat"));
+            return names;
+
+        }
+
+        private static IEnumerable<string> GetBooks() => GetLines(@"../../books.dat");
+
+        private static IEnumerable<string> GetMovies() => GetLines(@"../../movies.dat");
+
+        private static IEnumerable<string> GetLines(string path)
+        {
+            var file = File.OpenRead(path);
+            using (var reader = new StreamReader(file))
             {
-                var pairs = _synonyms.Where(pair => pair.Value == intentId);
-                foreach (var p in pairs)
+                string line = string.Empty;
+                while ((line = reader.ReadLine()) != null)
                 {
-                    foreach (var e in entities)
-                    {
-                        yield return Utterance.Create(p.Value, p.Key, e, entityType);
-                    }
+                    yield return line;
                 }
             }
+        }
 
-            public LuisDoc Create()
+        private static List<Utterance> CreateUtterances(IntentSynonyms synonyms, IEnumerable<string> names, IEnumerable<string> movies, IEnumerable<string> books)
+        {
+            var call = CreateUtterances(synonyms, Intents.Call, names, Entities.Contact);
+            var message = CreateUtterances(synonyms, Intents.Message, names, Entities.Contact);
+            var watch = CreateUtterances(synonyms, Intents.Watch, movies, Entities.Movie);
+            var read = CreateUtterances(synonyms, Intents.Read, books, Entities.Book);
+
+            var utterances = new List<Utterance>();
+            utterances.AddRange(call);
+            utterances.AddRange(message);
+            utterances.AddRange(watch);
+            utterances.AddRange(read);
+            return utterances;
+        }
+
+        private static IEnumerable<Utterance> CreateUtterances(IntentSynonyms synonyms, string intentId, IEnumerable<string> entities, string entityType)
+        {
+            var pairs = synonyms.Where(pair => pair.Value == intentId);
+            foreach (var p in pairs)
             {
-                var callUtterances = CreateUtterances(Intents.Call, _names, Entities.Contact);
-                var messageUtterances = CreateUtterances(Intents.Message, _names, Entities.Contact);
-                var watchUtterances = CreateUtterances(Intents.Watch, _movies, Entities.Movie);
-                var readUtterances = CreateUtterances(Intents.Read, _books, Entities.Book);
-
-                var utterances = new List<Utterance>();
-                utterances.AddRange(callUtterances);
-                utterances.AddRange(messageUtterances);
-                utterances.AddRange(watchUtterances);
-                utterances.AddRange(readUtterances);
-
-                return new LuisDoc()
+                foreach (var e in entities)
                 {
-                    luis_schema_version = "2.1.0",
-                    versionId = "0.1.2",
-                    culture = "en-us",
-                    desc = "training data",
-                    name = "my-radish",
-                    entities = Entities.All.Select(o => new Entity { name = o }).ToList(),
-                    intents = Intents.All.Select(o => new Intent { name = o }).ToList(),
-                    utterances = utterances
-                };
+                    yield return Utterance.Create(p.Value, p.Key, e, entityType);
+                }
             }
+        }
+
+        private static FileStream OpenFile(LuisDoc doc)
+        {
+            var folder = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            var fileName = $"luis-training-data-v{doc.versionId}.json";
+            var path = Path.Combine(folder, fileName);
+            return File.OpenWrite(path);
+        }
+
+        private static void SaveFile(LuisDoc doc, FileStream file)
+        {
+            new Json().Serialize(file, doc);
         }
     }
 }

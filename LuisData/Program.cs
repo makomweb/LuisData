@@ -134,11 +134,13 @@ namespace GenerateLuisData
             var watch = CreateUtterances(synonyms, Intents.Watch, movies, Entities.Movie);
             var read = CreateUtterances(synonyms, Intents.Read, books, Entities.Book);
 
-            var numUtterances = 10000 / Intents.All.Count;
-            call = pickRandom(call.ToList(), Math.Min(numUtterances, call.Count()));
-            message = pickRandom(message.ToList(), Math.Min(numUtterances, message.Count()));
-            watch = pickRandom(watch.ToList(), Math.Min(numUtterances, watch.Count()));
-            read = pickRandom(read.ToList(), Math.Min(numUtterances, read.Count()));
+            const int maxUtterances = 1000;
+            var maxUtterancesPerIntent = maxUtterances / Intents.All.Count;
+
+            call = PickRandom(call.ToList(), Math.Min(maxUtterancesPerIntent, call.Count()));
+            message = PickRandom(message.ToList(), Math.Min(maxUtterancesPerIntent, message.Count()));
+            watch = PickRandom(watch.ToList(), Math.Min(maxUtterancesPerIntent, watch.Count()));
+            read = PickRandom(read.ToList(), Math.Min(maxUtterancesPerIntent, read.Count()));
         
             var utterances = new List<Utterance>();
             utterances.AddRange(call);

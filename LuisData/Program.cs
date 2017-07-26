@@ -68,7 +68,7 @@ namespace GenerateLuisData
                 { "{preface} {intent} {middle} {entity} {trailer}", new List<Part>() {Part.Preface, Part.Intent, Part.Middle, Part.Entity, Part.Trailer} }
             };
 
-        private static IDictionary<Part, List<string>> noiseMap = new Dictionary<Part, List<string>>
+        private static IDictionary<Part, List<string>> partOptions = new Dictionary<Part, List<string>>
                                                                     {
                                                                             { Part.Preface, new List<string>() { "make", "do", "finish", "set", "complete", "start", "continue" } },
                                                                             { Part.Middle, new List<string>() { "to", "with", "by", "along", "for" } },
@@ -175,24 +175,23 @@ namespace GenerateLuisData
         
         //TODO: spoof the intent name a little bit on some
 
-        public static string CreateTextFromPattern(string patternFormat, List<Part> noises, string intent, string entity)
+        public static string CreateTextFromPattern(string patternFormat, List<Part> parts, string intent, string entity)
         {
-            var noiseMap = Program.noiseMap;
             var stringList = new List<string>();
-            foreach (var curNoise in noises)
+            foreach (var part in parts)
             {
-                if (curNoise == Part.Intent)
+                if (part == Part.Intent)
                 {
                     stringList.Add(intent);
                 }
-                else if (curNoise == Part.Entity)
+                else if (part == Part.Entity)
                 {
                     stringList.Add(entity);
                 }
                 else
                 {
-                    var possibleNoises = noiseMap[curNoise];
-                    stringList.Add(PickRandom(possibleNoises));
+                    var options = partOptions[part];
+                    stringList.Add(PickRandom(options));
                 }
             }
 

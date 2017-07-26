@@ -34,7 +34,7 @@ namespace GenerateLuisData
             public static List<string> All = new List<string> { Contact, Book, Movie };
         }
 
-        private enum Noise
+        public enum Part
         {
             Preface,
             Middle,
@@ -43,7 +43,7 @@ namespace GenerateLuisData
             Entity
         }
 
-        private static IDictionary<string, List<Part>> patterns = new Dictionary<string, List<Part>>
+        public static IDictionary<string, List<Part>> patterns = new Dictionary<string, List<Part>>
             {
                 { "{intent} {entity}", new List<Part>() {Part.Intent, Part.Entity} },
                 { "{entity} {intent}", new List<Part>() {Part.Entity, Part.Intent} },
@@ -142,9 +142,9 @@ namespace GenerateLuisData
         {
                 foreach (var entity in entities)
                 {
-                    foreach (var pattern in Patterns.Keys)
+                    foreach (var pattern in patterns.Keys)
                     {
-                        var text = CreateTextFromPattern(pattern, Patterns[pattern], intent, entity);
+                        var text = CreateTextFromPattern(pattern, patterns[pattern], intent, entity);
                         yield return Utterance.Create(text, intent, entity, entityType);
                     }
                 }
@@ -152,7 +152,7 @@ namespace GenerateLuisData
         
         //TODO: spoof the intent name a little bit on some
 
-        private static string CreateTextFromPattern(string patternFormat, List<Noise> noises, string intent, string entity)
+        public static string CreateTextFromPattern(string patternFormat, List<Part> noises, string intent, string entity)
         {
             var noiseMap = Program.noiseMap;
             var stringList = new List<string>();

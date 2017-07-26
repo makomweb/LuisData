@@ -260,7 +260,7 @@ namespace GenerateLuisData
             return new LuisDoc()
             {
                 luis_schema_version = "2.1.0",
-                versionId = "0.2.12",
+                versionId = "0.2.13",
                 culture = "en-us",
                 desc = "training data",
                 name = "my-radish",

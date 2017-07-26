@@ -27,11 +27,21 @@ namespace GenerateLuisData
 
         private static class Entities
         {
-            public static string Contact = "contact";
+            public static string Fullname = "fullname";
             public static string Book = "book";
             public static string Movie = "movie";
 
-            public static List<string> All = new List<string> { Contact, Book, Movie };
+            public static List<string> All = new List<string> { Fullname, Book, Movie };
+
+            public static Entity ToEntity(string entityName)
+            {
+                var entity = new Entity { name = entityName };
+                if (entityName == Fullname)
+                {
+                    entity.children = new[] { "First", "Last" };
+                }
+                return entity;
+            }
         }
 
         public enum Part
@@ -85,7 +95,7 @@ namespace GenerateLuisData
                 culture = "en-us",
                 desc = "training data",
                 name = "my-radish",
-                entities = Entities.All.Select(o => new Entity { name = o }).ToList(),
+                entities = Entities.All.Select(o => Entities.ToEntity(o)).ToList(),
                 intents = Intents.All.Select(o => new Intent { name = o }).ToList(),
                 utterances = CreateUtterances(names, movies, books)
             };
@@ -117,8 +127,8 @@ namespace GenerateLuisData
 
         private static List<Utterance> CreateUtterances(IEnumerable<string> names, IEnumerable<string> movies, IEnumerable<string> books)
         {
-            var call = CreateUtterances(Intents.Call, names, Entities.Contact);
-            var message = CreateUtterances(Intents.Message, names, Entities.Contact);
+            var call = CreateUtterances(Intents.Call, names, Entities.Fullname);
+            var message = CreateUtterances(Intents.Message, names, Entities.Fullname);
             var watch = CreateUtterances(Intents.Watch, movies, Entities.Movie);
             var read = CreateUtterances(Intents.Read, books, Entities.Book);
 

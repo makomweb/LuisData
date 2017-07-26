@@ -2,8 +2,6 @@
 
 namespace GenerateLuisData
 {
-    using System;
-
     public class Utterance
     {
         public static Utterance Create(string text, string intent, string name, string entity)

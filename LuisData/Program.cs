@@ -43,26 +43,26 @@ namespace GenerateLuisData
             Entity
         }
 
-        private static IDictionary<string, List<Noise>> patterns = new Dictionary<string, List<Noise>>
+        private static IDictionary<string, List<Part>> patterns = new Dictionary<string, List<Part>>
             {
-                { "{intent} {entity}", new List<Noise>() {Noise.Intent, Noise.Entity} },
-                { "{entity} {intent}", new List<Noise>() {Noise.Entity, Noise.Intent} },
-                { "{intent} {entity} {trailer}", new List<Noise>() { Noise.Intent, Noise.Entity, Noise.Trailer } },
-                { "{preface} {intent} {entity}", new List<Noise>() {Noise.Preface, Noise.Intent, Noise.Entity} },
-                { "{preface} {intent} {entity} {trailer}", new List<Noise>() { Noise.Preface, Noise.Intent, Noise.Entity, Noise.Trailer } },
-                { "{intent} {middle} {entity}", new List<Noise>() { Noise.Intent, Noise.Middle, Noise.Entity } },
-                { "{intent} {middle} {entity} {trailer}", new List<Noise>() { Noise.Intent, Noise.Middle, Noise.Entity, Noise.Trailer } },
-                { "{preface} {entity} {middle} {intent}", new List<Noise>() { Noise.Preface, Noise.Entity, Noise.Middle, Noise.Intent } },
-                { "{preface} {intent} {middle} {entity}", new List<Noise>() { Noise.Preface, Noise.Intent, Noise.Middle, Noise.Entity } },
-                { "{preface} {intent} {middle} {entity} {trailer}", new List<Noise>() {Noise.Preface, Noise.Intent, Noise.Middle, Noise.Entity, Noise.Trailer} }
+                { "{intent} {entity}", new List<Part>() {Part.Intent, Part.Entity} },
+                { "{entity} {intent}", new List<Part>() {Part.Entity, Part.Intent} },
+                { "{intent} {entity} {trailer}", new List<Part>() { Part.Intent, Part.Entity, Part.Trailer } },
+                { "{preface} {intent} {entity}", new List<Part>() {Part.Preface, Part.Intent, Part.Entity} },
+                { "{preface} {intent} {entity} {trailer}", new List<Part>() { Part.Preface, Part.Intent, Part.Entity, Part.Trailer } },
+                { "{intent} {middle} {entity}", new List<Part>() { Part.Intent, Part.Middle, Part.Entity } },
+                { "{intent} {middle} {entity} {trailer}", new List<Part>() { Part.Intent, Part.Middle, Part.Entity, Part.Trailer } },
+                { "{preface} {entity} {middle} {intent}", new List<Part>() { Part.Preface, Part.Entity, Part.Middle, Part.Intent } },
+                { "{preface} {intent} {middle} {entity}", new List<Part>() { Part.Preface, Part.Intent, Part.Middle, Part.Entity } },
+                { "{preface} {intent} {middle} {entity} {trailer}", new List<Part>() {Part.Preface, Part.Intent, Part.Middle, Part.Entity, Part.Trailer} }
             };
 
 
-        private static IDictionary<Noise, List<string>> noiseMap = new Dictionary<Noise, List<string>>
+        private static IDictionary<Part, List<string>> noiseMap = new Dictionary<Part, List<string>>
                                                                     {
-                                                                            { Noise.Preface, new List<string>() { "make", "do", "finish", "set", "complete", "start", "continue" } },
-                                                                            { Noise.Middle, new List<string>() { "to", "with", "by", "along", "for" } },
-                                                                            { Noise.Trailer, new List<string>() { "again", "tomorrow", "today", "first", "last", "later" } }
+                                                                            { Part.Preface, new List<string>() { "make", "do", "finish", "set", "complete", "start", "continue" } },
+                                                                            { Part.Middle, new List<string>() { "to", "with", "by", "along", "for" } },
+                                                                            { Part.Trailer, new List<string>() { "again", "tomorrow", "today", "first", "last", "later" } }
                                                                     };
 
         private class IntentSynonyms : Dictionary<string, string> { }
@@ -158,11 +158,11 @@ namespace GenerateLuisData
             var stringList = new List<string>();
             foreach (var curNoise in noises)
             {
-                if (curNoise == Noise.Intent)
+                if (curNoise == Part.Intent)
                 {
                     stringList.Add(intent);
                 }
-                else if (curNoise == Noise.Entity)
+                else if (curNoise == Part.Entity)
                 {
                     stringList.Add(entity);
                 }

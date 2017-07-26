@@ -6,8 +6,6 @@ using System.Linq;
 
 namespace GenerateLuisData
 {
-    using System.Text;
-
     public class Program
     {
         private static void Main(string[] args)
@@ -44,7 +42,6 @@ namespace GenerateLuisData
             Intent,
             Entity
         }
-
 
         private static IDictionary<string, List<Noise>> patterns = new Dictionary<string, List<Noise>>
             {
@@ -111,7 +108,6 @@ namespace GenerateLuisData
             var names = GetLines(@"../../names.dat").ToList();
             names.AddRange(GetLines(@"../../advanced-names.dat"));
             return names;
-
         }
 
         private static IEnumerable<string> GetBooks() => GetLines(@"../../books.dat");
@@ -160,16 +156,16 @@ namespace GenerateLuisData
             {
                 foreach (var e in entities)
                 {
-                    foreach (var pattern in Program.patterns.Keys)
+                    foreach (var pattern in patterns.Keys)
                     {
-                        var text = createTextFromPattern(pattern, Program.patterns[pattern], p.Key, e);
+                        var text = CreateTextFromPattern(pattern, patterns[pattern], p.Key, e);
                         yield return Utterance.Create(text, p.Value, p.Key, e, entityType);
                     }
                 }
             }
         }//TODO: spoof the intent name a little bit on some
 
-        private static string createTextFromPattern(string patternFormat, List<Noise> noises, string intent, string entity)
+        private static string CreateTextFromPattern(string patternFormat, List<Noise> noises, string intent, string entity)
         {
             var noiseMap = Program.noiseMap;
             var stringList = new List<string>();
@@ -178,33 +174,34 @@ namespace GenerateLuisData
                 if (curNoise == Noise.Intent)
                 {
                     stringList.Add(intent);
-                } else if (curNoise == Noise.Entity)
+                }
+                else if (curNoise == Noise.Entity)
                 {
                     stringList.Add(entity);
                 }
                 else
                 {
                     var possibleNoises = noiseMap[curNoise];
-                    stringList.Add(pickRandom(possibleNoises));
+                    stringList.Add(PickRandom(possibleNoises));
                 }
             }
 
             return string.Join(" ", stringList);
         }
 
-        private static List<T> pickRandom<T>(List<T> collection, int count)
+        private static List<T> PickRandom<T>(List<T> collection, int count)
         {
             var list = new List<T>();
             for (var i = 0; i < count; i++)
             {
-                var element = pickRandom(collection);
+                var element = PickRandom(collection);
                 list.Add(element);
                 collection.Remove(element);
             }
             return list;
         }
 
-        private static T pickRandom<T>(IEnumerable<T> collection)
+        private static T PickRandom<T>(IEnumerable<T> collection)
         {
             var rand = new Random();
             return collection.ElementAt(rand.Next(0, collection.Count()));

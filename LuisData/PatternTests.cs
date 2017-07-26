@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace GenerateLuisData
 {
@@ -7,10 +8,20 @@ namespace GenerateLuisData
     public class PatternTests
     {
         [TestMethod]
-        public async Task RunAsync()
+        public void Run()
         {
-            var text = Program.CreateTextFromPattern(null, null, null, null);
-            Assert.IsFalse(string.IsNullOrEmpty(text), "'text' should not be null or empty!");
+            var parts = new List<Program.Part>() { Program.Part.Preface, Program.Part.Intent, Program.Part.Middle, Program.Part.Entity, Program.Part.Trailer };
+            var combinations = Program.CreateCombinations(parts);
+            Assert.IsNotNull(combinations);
+            foreach (var c in combinations)
+            {
+                Debug.WriteLine(AsHumanReadible(c));
+            }
+        }
+
+        private static string AsHumanReadible(Program.PartOptionCombination combination)
+        {
+            return $"{combination.Preface} - {combination.Middle} - {combination.Trailer}";
         }
     }
 }

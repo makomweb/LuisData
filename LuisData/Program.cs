@@ -1,6 +1,7 @@
 ﻿using Serializer;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
@@ -73,6 +74,175 @@ namespace GenerateLuisData
                                                                             { Part.Trailer, new List<string>() { "again", "tomorrow", "today", "first", "last", "later" } }
                                                                     };
 
+        public class PartOptionCombination
+        {
+            public PartOptionCombination(string preface, string middle, string trailer)                
+            {
+                Preface = preface;
+                Middle = middle;
+                Trailer = trailer;
+            }
+
+            public string Preface { get; private set; }
+            public string Middle { get; private set; }
+            public string Trailer { get; private set; }
+
+            [Conditional("DEBUG")]
+            private void Assert(IEnumerable<Part> pattern)
+            {
+                Debug.Assert(pattern.Contains(Part.Preface) == !string.IsNullOrEmpty(Preface), "Can't provide 'Preface'!");
+                Debug.Assert(pattern.Contains(Part.Middle) == !string.IsNullOrEmpty(Middle), "Can't provide 'Middle'!");
+                Debug.Assert(pattern.Contains(Part.Trailer) == !string.IsNullOrEmpty(Trailer), "Can't provide 'Trailer'!");
+            }
+
+            public string CreateText(IEnumerable<Part> pattern, string intent, string entity)
+            {
+                Assert(pattern);
+
+                var result = new List<PartOptionCombination>();
+
+                var containsPreface = pattern.Contains(Part.Preface);
+                var containsMiddle = pattern.Contains(Part.Middle);
+                var containsTrailer = pattern.Contains(Part.Trailer);
+
+                if (containsPreface)
+                {
+                    if (containsMiddle)
+                    {
+                        if (containsTrailer)
+                        {
+                            return $"{Preface} {intent} {Middle} {entity} {Trailer}";
+                        }
+                        else
+                        {
+                            return $"{Preface} {intent} {Middle} {entity}";
+                        }
+                    }
+                    else
+                    {
+                        if (containsTrailer)
+                        {
+                            return $"{Preface} {intent} {entity} {Trailer}";
+                        }
+                        else
+                        {
+                            return $"{Preface} {intent} {entity}";
+                        }
+                    }
+                }
+                else
+                {
+                    if (containsMiddle)
+                    {
+                        if (containsTrailer)
+                        {
+                            return $"{intent} {Middle} {entity} {Trailer}";
+                        }
+                        else
+                        {
+                            return $"{intent} {Middle} {entity}";
+                        }
+                    }
+                    else
+                    {
+                        if (containsTrailer)
+                        {
+                            return $"{intent} {entity} {Trailer}";
+                        }
+                        else
+                        {
+                            return $"{intent} {entity}";
+                        }
+                    }
+                }
+            }
+        }
+
+        public static IEnumerable<PartOptionCombination> CreateCombinations(IEnumerable<Part> parts)
+        {
+            Debug.Assert(parts.Contains(Part.Intent), "'parts' must contain and intent!");
+            Debug.Assert(parts.Contains(Part.Entity), "'parts' must contain and entity!");
+
+            var result = new List<PartOptionCombination>();
+
+            var containsPreface = parts.Contains(Part.Preface);
+            var containsMiddle = parts.Contains(Part.Middle);
+            var containsTrailer = parts.Contains(Part.Trailer);
+
+            if (containsPreface && !containsMiddle && !containsTrailer)
+            {
+                foreach (var p in partOptions[Part.Preface])
+                {
+                    result.Add(new PartOptionCombination(p, string.Empty, string.Empty));
+                }
+            }
+
+            if (!containsPreface && containsMiddle && !containsTrailer)
+            {
+                foreach (var m in partOptions[Part.Middle])
+                {
+                    result.Add(new PartOptionCombination(string.Empty, m, string.Empty));
+                }
+            }
+
+            if (!containsPreface && !containsMiddle && containsTrailer)
+            {
+                foreach (var t in partOptions[Part.Trailer])
+                {
+                    result.Add(new PartOptionCombination(string.Empty, string.Empty, t));
+                }
+            }
+
+            if (containsPreface && containsMiddle && !containsTrailer)
+            {
+                foreach (var p in partOptions[Part.Preface])
+                {
+                    foreach (var m in partOptions[Part.Middle])
+                    {
+                        result.Add(new PartOptionCombination(p, m, string.Empty));
+                    }
+                }
+            }
+
+            if (containsPreface && !containsMiddle && containsTrailer)
+            {
+                foreach (var p in partOptions[Part.Preface])
+                {
+                    foreach (var t in partOptions[Part.Trailer])
+                    {
+                        result.Add(new PartOptionCombination(p, string.Empty, t));
+                    }
+                }
+            }
+
+            if (!containsPreface && containsMiddle && containsTrailer)
+            {
+                foreach (var m in partOptions[Part.Middle])
+                {
+                    foreach (var t in partOptions[Part.Trailer])
+                    {
+                        result.Add(new PartOptionCombination(string.Empty, m, t));
+                    }
+                }
+            }
+
+            if (containsPreface && containsMiddle && containsTrailer)
+            {
+                foreach (var p in partOptions[Part.Preface])
+                {
+                    foreach (var m in partOptions[Part.Middle])
+                    {
+                        foreach (var t in partOptions[Part.Trailer])
+                        {
+                            result.Add(new PartOptionCombination(p, m, t));
+                        }
+                    }
+                }
+            }
+
+            return result;
+        }
+
         private class IntentSynonyms : Dictionary<string, string> { }
 
         private static LuisDoc Generate()
@@ -90,7 +260,7 @@ namespace GenerateLuisData
             return new LuisDoc()
             {
                 luis_schema_version = "2.1.0",
-                versionId = "0.2.7",
+                versionId = "0.2.12",
                 culture = "en-us",
                 desc = "training data",
                 name = "my-radish",
@@ -149,7 +319,7 @@ namespace GenerateLuisData
             message = PickRandom(message.ToList(), Math.Min(maxUtterancesPerIntent, message.Count()));
             watch = PickRandom(watch.ToList(), Math.Min(maxUtterancesPerIntent, watch.Count()));
             read = PickRandom(read.ToList(), Math.Min(maxUtterancesPerIntent, read.Count()));
-        
+
             var utterances = new List<Utterance>();
             utterances.AddRange(simpleCall);
             //utterances.AddRange(advancedCall);
@@ -161,17 +331,47 @@ namespace GenerateLuisData
 
         private static IEnumerable<Utterance> CreateUtterances(string intent, IEnumerable<string> entities, string entityType)
         {
-                foreach (var entity in entities)
+            var result = new List<Utterance>();
+            foreach (var entity in entities)
+            {
+                foreach (var pattern in patterns.Keys)
                 {
-                    foreach (var pattern in patterns.Keys)
+#if false
+                    var text = CreateTextFromPattern(pattern, patterns[pattern], intent, entity);
+                    yield return Utterance.Create(text, intent, entity, entityType);
+#else
+                    var texts = CreateTextsFromPattern(pattern, patterns[pattern], intent, entity);
+
+                    foreach (var t in texts)
                     {
-                        var text = CreateTextFromPattern(pattern, patterns[pattern], intent, entity);
-                        yield return Utterance.Create(text, intent, entity, entityType);
+                        result.Add(Utterance.Create(t, intent, entity, entityType));
                     }
+#endif
                 }
+            }
+            return result;
         }
-        
+
         //TODO: spoof the intent name a little bit on some
+
+        public static IEnumerable<string> CreateTextsFromPattern(string patternFormat, List<Part> parts, string intent, string entity)
+        {
+            var result = new List<string>();
+            var combinations = CreateCombinations(parts);
+            if (combinations.Any())
+            {
+                foreach (var combination in combinations)
+                {
+                    result.Add(combination.CreateText(parts, intent, entity));
+                }
+            }
+            else
+            {
+                result.Add($"{intent} {entity}");
+            }
+
+            return result;
+        }
 
         public static string CreateTextFromPattern(string patternFormat, List<Part> parts, string intent, string entity)
         {

@@ -8,7 +8,8 @@ namespace Tests
         [Theory]
         public async Task RunAsync()
         {
-
+            var text = GenerateLuisData.Program.CreateTextFromPattern(null, null, null, null);
+            Assert.False(string.IsNullOrEmpty(text), "'text' should not be null or empty!");
         }
     }
 }

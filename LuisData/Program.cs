@@ -148,7 +148,6 @@ namespace GenerateLuisData
 
         private static IEnumerable<Utterance> CreateUtterances(IntentSynonyms synonyms, string intentId, IEnumerable<string> entities, string entityType)
         {
-            //var temp = string.Format("{0} {1}", new string[] { "hi", "hello" });
             var pairs = synonyms.Where(pair => pair.Value == intentId);
             foreach (var p in pairs)
             {
@@ -161,7 +160,9 @@ namespace GenerateLuisData
                     }
                 }
             }
-        }//TODO: spoof the intent name a little bit on some
+        }
+        
+        //TODO: spoof the intent name a little bit on some
 
         private static string CreateTextFromPattern(string patternFormat, List<Noise> noises, string intent, string entity)
         {

@@ -57,13 +57,11 @@ namespace GenerateLuisData
         public static IDictionary<string, List<Part>> patterns = new Dictionary<string, List<Part>>
             {
                 { "{intent} {entity}", new List<Part>() {Part.Intent, Part.Entity} },
-                { "{entity} {intent}", new List<Part>() {Part.Entity, Part.Intent} },
                 { "{intent} {entity} {trailer}", new List<Part>() { Part.Intent, Part.Entity, Part.Trailer } },
                 { "{preface} {intent} {entity}", new List<Part>() {Part.Preface, Part.Intent, Part.Entity} },
                 { "{preface} {intent} {entity} {trailer}", new List<Part>() { Part.Preface, Part.Intent, Part.Entity, Part.Trailer } },
                 { "{intent} {middle} {entity}", new List<Part>() { Part.Intent, Part.Middle, Part.Entity } },
                 { "{intent} {middle} {entity} {trailer}", new List<Part>() { Part.Intent, Part.Middle, Part.Entity, Part.Trailer } },
-                { "{preface} {entity} {middle} {intent}", new List<Part>() { Part.Preface, Part.Entity, Part.Middle, Part.Intent } },
                 { "{preface} {intent} {middle} {entity}", new List<Part>() { Part.Preface, Part.Intent, Part.Middle, Part.Entity } },
                 { "{preface} {intent} {middle} {entity} {trailer}", new List<Part>() {Part.Preface, Part.Intent, Part.Middle, Part.Entity, Part.Trailer} }
             };

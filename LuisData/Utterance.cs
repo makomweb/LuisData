@@ -16,20 +16,6 @@ namespace GenerateLuisData
             };
         }
 
-        public override bool Equals(Object obj)
-        {
-            Utterance personObj = obj as Utterance;
-            if (personObj == null)
-                return false;
-            else
-                return text.Equals(personObj.text);
-        }
-
-        public override int GetHashCode()
-        {
-            return this.text.GetHashCode();
-        }
-
         public class Entity
         {
             public static Entity Create(string text, string entityText, string entity)

@@ -98,7 +98,19 @@ namespace GenerateLuisData
                 name = "my-radish",
                 entities = Entities.All.Select(o => Entities.ToEntity(o)).ToList(),
                 intents = Intents.All.Select(o => new Intent { name = o }).ToList(),
-                utterances = CreateUtterances(advancedNames, names, movies, books)
+                utterances = CreateUtterances(advancedNames, names, movies, books),
+                model_features = CreateSynonyms().ToArray()
+            };
+        }
+
+        private static IEnumerable<ModelFeature> CreateSynonyms()
+        {
+            return new List<ModelFeature>
+            {
+                ModelFeature.Create("Call_Phrase_List", "contact,calling,calls,connect,phone,sms,fax,mobile,voice,text,texts,call"),
+                ModelFeature.Create("Email_Phrase_List", "email,e mail,mail,electronic mail,mails,emails,emailing,e - mails,e - mail,message,e mails"),
+                ModelFeature.Create("Watch_Phrase_List", "watch,watching,check out,see,view,go watch,go see"),
+                ModelFeature.Create("Read_Phrase_List", "read,reading,study,research,reader,reads,readers")
             };
         }
 

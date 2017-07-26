@@ -2,6 +2,19 @@
 
 namespace GenerateLuisData
 {
+    public class ModelFeature
+    {
+        public string name { get; set; }
+        public bool mode { get; set; }
+        public string words { get; set; }
+        public bool activated { get; set; }
+
+        public static ModelFeature Create(string name, string commaSeparatedWords)
+        {
+            return new ModelFeature { name = name, words = commaSeparatedWords, mode = true, activated = true };
+        }
+    }
+
     public class LuisDoc
     {
         public string luis_schema_version { get; set; }
@@ -13,7 +26,7 @@ namespace GenerateLuisData
         public object[] closedLists = new object[] { };
         public object[] bing_entities = new object[] { };
         public object[] actions = new object[] { };
-        public object[] model_features = new object[] { };
+        public ModelFeature[] model_features = new ModelFeature[] { };
         public object[] regex_features = new object[] { };
         public List<Intent> intents { get; set; }
         public List<Entity> entities { get; set; }

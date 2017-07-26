@@ -125,8 +125,8 @@ namespace GenerateLuisData
 
         private static List<Utterance> CreateUtterances(IEnumerable<string> advancedNames, IEnumerable<string> simpleNames, IEnumerable<string> movies, IEnumerable<string> books)
         {
-            var simpleCalls = CreateUtterances(Intents.Call, simpleNames, Entities.Name);
-            var advancedCalls = CreateUtterances(Intents.Call, advancedNames, Entities.FullName);
+            var simpleCall = CreateUtterances(Intents.Call, simpleNames, Entities.Name);
+            var advancedCall = CreateUtterances(Intents.Call, advancedNames, Entities.FullName);
             var message = CreateUtterances(Intents.Message, simpleNames, Entities.FullName);
             var watch = CreateUtterances(Intents.Watch, movies, Entities.Movie);
             var read = CreateUtterances(Intents.Read, books, Entities.Book);
@@ -134,15 +134,15 @@ namespace GenerateLuisData
             const int maxUtterances = 10000;
             var maxUtterancesPerIntent = maxUtterances / Intents.All.Count;
 
-            simpleCalls = PickRandom(simpleCalls.ToList(), Math.Min(maxUtterancesPerIntent, simpleCalls.Count()));
-            advancedCalls = PickRandom(advancedCalls.ToList(), Math.Min(maxUtterancesPerIntent, advancedCalls.Count()));
+            simpleCall = PickRandom(simpleCall.ToList(), Math.Min(maxUtterancesPerIntent, simpleCall.Count()));
+            advancedCall = PickRandom(advancedCall.ToList(), Math.Min(maxUtterancesPerIntent, advancedCall.Count()));
             message = PickRandom(message.ToList(), Math.Min(maxUtterancesPerIntent, message.Count()));
             watch = PickRandom(watch.ToList(), Math.Min(maxUtterancesPerIntent, watch.Count()));
             read = PickRandom(read.ToList(), Math.Min(maxUtterancesPerIntent, read.Count()));
         
             var utterances = new List<Utterance>();
-            utterances.AddRange(simpleCalls);
-            utterances.AddRange(advancedCalls);
+            utterances.AddRange(simpleCall);
+            utterances.AddRange(advancedCall);
             utterances.AddRange(message);
             utterances.AddRange(watch);
             utterances.AddRange(read);

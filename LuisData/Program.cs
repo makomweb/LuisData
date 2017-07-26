@@ -27,11 +27,12 @@ namespace GenerateLuisData
 
         private static class Entities
         {
+            public static string Contact = "contact";
             public static string Fullname = "fullname";
             public static string Book = "book";
             public static string Movie = "movie";
 
-            public static List<string> All = new List<string> { Fullname, Book, Movie };
+            public static List<string> All = new List<string> { Contact, Fullname, Book, Movie };
 
             public static Entity ToEntity(string entityName)
             {
@@ -79,34 +80,32 @@ namespace GenerateLuisData
 
         private static LuisDoc Generate()
         {
-            var names = GetNames();
+            var advancedNames = GetAdvancedNames();
+            var simpleNames = GetSimpleNames();
             var books = GetBooks();
             var movies = GetMovies();
 
-            return Generate(names, movies, books);
+            return Generate(advancedNames, simpleNames, movies, books);
         }
 
-        private static LuisDoc Generate(IEnumerable<string> names, IEnumerable<string> movies, IEnumerable<string> books)
+        private static LuisDoc Generate(IEnumerable<string> advancedNames, IEnumerable<string> names, IEnumerable<string> movies, IEnumerable<string> books)
         {
             return new LuisDoc()
             {
                 luis_schema_version = "2.1.0",
-                versionId = "0.2.4",
+                versionId = "0.2.6",
                 culture = "en-us",
                 desc = "training data",
                 name = "my-radish",
                 entities = Entities.All.Select(o => Entities.ToEntity(o)).ToList(),
                 intents = Intents.All.Select(o => new Intent { name = o }).ToList(),
-                utterances = CreateUtterances(names, movies, books)
+                utterances = CreateUtterances(advancedNames, names, movies, books)
             };
         }
 
-        private static IEnumerable<string> GetNames()
-        {
-            var names = GetLines(@"../../names.dat").ToList();
-            names.AddRange(GetLines(@"../../advanced-names.dat"));
-            return names;
-        }
+        private static IEnumerable<string> GetAdvancedNames() => GetLines(@"../../advanced-names.dat");
+
+        private static IEnumerable<string> GetSimpleNames() => GetLines(@"../../names.dat").ToList();
 
         private static IEnumerable<string> GetBooks() => GetLines(@"../../books.dat");
 
@@ -125,23 +124,26 @@ namespace GenerateLuisData
             }
         }
 
-        private static List<Utterance> CreateUtterances(IEnumerable<string> names, IEnumerable<string> movies, IEnumerable<string> books)
+        private static List<Utterance> CreateUtterances(IEnumerable<string> advancedNames, IEnumerable<string> simpleNames, IEnumerable<string> movies, IEnumerable<string> books)
         {
-            var call = CreateUtterances(Intents.Call, names, Entities.Fullname);
-            var message = CreateUtterances(Intents.Message, names, Entities.Fullname);
+            var simpleCalls = CreateUtterances(Intents.Call, simpleNames, Entities.Contact);
+            var advancedCalls = CreateUtterances(Intents.Call, advancedNames, Entities.Fullname);
+            var message = CreateUtterances(Intents.Message, simpleNames, Entities.Fullname);
             var watch = CreateUtterances(Intents.Watch, movies, Entities.Movie);
             var read = CreateUtterances(Intents.Read, books, Entities.Book);
 
-            const int maxUtterances = 1000;
+            const int maxUtterances = 5000;
             var maxUtterancesPerIntent = maxUtterances / Intents.All.Count;
 
-            call = PickRandom(call.ToList(), Math.Min(maxUtterancesPerIntent, call.Count()));
+            simpleCalls = PickRandom(simpleCalls.ToList(), Math.Min(maxUtterancesPerIntent, simpleCalls.Count()));
+            advancedCalls = PickRandom(advancedCalls.ToList(), Math.Min(maxUtterancesPerIntent, advancedCalls.Count()));
             message = PickRandom(message.ToList(), Math.Min(maxUtterancesPerIntent, message.Count()));
             watch = PickRandom(watch.ToList(), Math.Min(maxUtterancesPerIntent, watch.Count()));
             read = PickRandom(read.ToList(), Math.Min(maxUtterancesPerIntent, read.Count()));
         
             var utterances = new List<Utterance>();
-            utterances.AddRange(call);
+            utterances.AddRange(simpleCalls);
+            utterances.AddRange(advancedCalls);
             utterances.AddRange(message);
             utterances.AddRange(watch);
             utterances.AddRange(read);

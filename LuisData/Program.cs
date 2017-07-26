@@ -72,13 +72,9 @@ namespace GenerateLuisData
             var intentSynonyms = new IntentSynonyms
             {
                 { "call", Intents.Call },
-                { "phone", Intents.Call },
-                { "email", Intents.Message },
                 { "message", Intents.Message },
                 { "read", Intents.Read },
-                { "research", Intents.Read },
                 { "watch", Intents.Watch },
-                { "see", Intents.Watch }
             };
 
             var names = GetNames();

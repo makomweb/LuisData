@@ -69,22 +69,14 @@ namespace GenerateLuisData
 
         private static LuisDoc Generate()
         {
-            var intentSynonyms = new IntentSynonyms
-            {
-                { "call", Intents.Call },
-                { "message", Intents.Message },
-                { "read", Intents.Read },
-                { "watch", Intents.Watch },
-            };
-
             var names = GetNames();
             var books = GetBooks();
             var movies = GetMovies();
 
-            return Generate(intentSynonyms, names, movies, books);
+            return Generate(names, movies, books);
         }
 
-        private static LuisDoc Generate(IntentSynonyms synonyms, IEnumerable<string> names, IEnumerable<string> movies, IEnumerable<string> books)
+        private static LuisDoc Generate(IEnumerable<string> names, IEnumerable<string> movies, IEnumerable<string> books)
         {
             return new LuisDoc()
             {
@@ -95,7 +87,7 @@ namespace GenerateLuisData
                 name = "my-radish",
                 entities = Entities.All.Select(o => new Entity { name = o }).ToList(),
                 intents = Intents.All.Select(o => new Intent { name = o }).ToList(),
-                utterances = CreateUtterances(synonyms, names, movies, books)
+                utterances = CreateUtterances(names, movies, books)
             };
         }
 
@@ -123,12 +115,12 @@ namespace GenerateLuisData
             }
         }
 
-        private static List<Utterance> CreateUtterances(IntentSynonyms synonyms, IEnumerable<string> names, IEnumerable<string> movies, IEnumerable<string> books)
+        private static List<Utterance> CreateUtterances(IEnumerable<string> names, IEnumerable<string> movies, IEnumerable<string> books)
         {
-            var call = CreateUtterances(synonyms, Intents.Call, names, Entities.Contact);
-            var message = CreateUtterances(synonyms, Intents.Message, names, Entities.Contact);
-            var watch = CreateUtterances(synonyms, Intents.Watch, movies, Entities.Movie);
-            var read = CreateUtterances(synonyms, Intents.Read, books, Entities.Book);
+            var call = CreateUtterances(Intents.Call, names, Entities.Contact);
+            var message = CreateUtterances(Intents.Message, names, Entities.Contact);
+            var watch = CreateUtterances(Intents.Watch, movies, Entities.Movie);
+            var read = CreateUtterances(Intents.Read, books, Entities.Book);
 
             const int maxUtterances = 1000;
             var maxUtterancesPerIntent = maxUtterances / Intents.All.Count;
@@ -146,20 +138,16 @@ namespace GenerateLuisData
             return utterances;
         }
 
-        private static IEnumerable<Utterance> CreateUtterances(IntentSynonyms synonyms, string intentId, IEnumerable<string> entities, string entityType)
+        private static IEnumerable<Utterance> CreateUtterances(string intent, IEnumerable<string> entities, string entityType)
         {
-            var pairs = synonyms.Where(pair => pair.Value == intentId);
-            foreach (var p in pairs)
-            {
-                foreach (var e in entities)
+                foreach (var entity in entities)
                 {
-                    foreach (var pattern in patterns.Keys)
+                    foreach (var pattern in Patterns.Keys)
                     {
-                        var text = CreateTextFromPattern(pattern, patterns[pattern], p.Key, e);
-                        yield return Utterance.Create(text, p.Value, p.Key, e, entityType);
+                        var text = CreateTextFromPattern(pattern, Patterns[pattern], intent, entity);
+                        yield return Utterance.Create(text, intent, entity, entityType);
                     }
                 }
-            }
         }
         
         //TODO: spoof the intent name a little bit on some

@@ -6,7 +6,7 @@ namespace GenerateLuisData
 
     public class Utterance
     {
-        public static Utterance Create(string text, string intent, string synonym, string name, string entity)
+        public static Utterance Create(string text, string intent, string name, string entity)
         {
             return new Utterance
             {

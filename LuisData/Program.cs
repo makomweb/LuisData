@@ -62,7 +62,7 @@ namespace GenerateLuisData
                                                                     {
                                                                             { Noise.Preface, new List<string>() { "make", "do", "finish", "set", "complete", "start", "continue" } },
                                                                             { Noise.Middle, new List<string>() { "to", "with", "by", "along", "for" } },
-                                                                            { Noise.Trailer, new List<string>() { "again", "tomorrow", "today", "first", "last" } }
+                                                                            { Noise.Trailer, new List<string>() { "again", "tomorrow", "today", "first", "last", "later" } }
                                                                     };
 
         private class IntentSynonyms : Dictionary<string, string> { }

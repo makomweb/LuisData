@@ -27,17 +27,17 @@ namespace GenerateLuisData
 
         private static class Entities
         {
-            public static string Contact = "contact";
-            public static string Fullname = "fullname";
+            public static string Name = "name";
+            public static string FullName = "fullname";
             public static string Book = "book";
             public static string Movie = "movie";
 
-            public static List<string> All = new List<string> { Contact, Fullname, Book, Movie };
+            public static List<string> All = new List<string> { Name, FullName, Book, Movie };
 
             public static Entity ToEntity(string entityName)
             {
                 var entity = new Entity { name = entityName };
-                if (entityName == Fullname)
+                if (entityName == FullName)
                 {
                     entity.children = new[] { "First", "Last" };
                 }
@@ -67,7 +67,6 @@ namespace GenerateLuisData
                 { "{preface} {intent} {middle} {entity}", new List<Part>() { Part.Preface, Part.Intent, Part.Middle, Part.Entity } },
                 { "{preface} {intent} {middle} {entity} {trailer}", new List<Part>() {Part.Preface, Part.Intent, Part.Middle, Part.Entity, Part.Trailer} }
             };
-
 
         private static IDictionary<Part, List<string>> noiseMap = new Dictionary<Part, List<string>>
                                                                     {
@@ -126,13 +125,13 @@ namespace GenerateLuisData
 
         private static List<Utterance> CreateUtterances(IEnumerable<string> advancedNames, IEnumerable<string> simpleNames, IEnumerable<string> movies, IEnumerable<string> books)
         {
-            var simpleCalls = CreateUtterances(Intents.Call, simpleNames, Entities.Contact);
-            var advancedCalls = CreateUtterances(Intents.Call, advancedNames, Entities.Fullname);
-            var message = CreateUtterances(Intents.Message, simpleNames, Entities.Fullname);
+            var simpleCalls = CreateUtterances(Intents.Call, simpleNames, Entities.Name);
+            var advancedCalls = CreateUtterances(Intents.Call, advancedNames, Entities.FullName);
+            var message = CreateUtterances(Intents.Message, simpleNames, Entities.FullName);
             var watch = CreateUtterances(Intents.Watch, movies, Entities.Movie);
             var read = CreateUtterances(Intents.Read, books, Entities.Book);
 
-            const int maxUtterances = 5000;
+            const int maxUtterances = 10000;
             var maxUtterancesPerIntent = maxUtterances / Intents.All.Count;
 
             simpleCalls = PickRandom(simpleCalls.ToList(), Math.Min(maxUtterancesPerIntent, simpleCalls.Count()));

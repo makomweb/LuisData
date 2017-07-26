@@ -2,18 +2,32 @@
 
 namespace GenerateLuisData
 {
+    using System;
+
     public class Utterance
     {
-        public static Utterance Create(string intent, string synonym, string name, string entity)
+        public static Utterance Create(string text, string intent, string synonym, string name, string entity)
         {
-            var text = $"{synonym} {name}";
-
             return new Utterance
             {
                 text = text,
                 intent = intent,
                 entities = new List<Entity> { Entity.Create(text, name, entity) }
             };
+        }
+
+        public override bool Equals(Object obj)
+        {
+            Utterance personObj = obj as Utterance;
+            if (personObj == null)
+                return false;
+            else
+                return text.Equals(personObj.text);
+        }
+
+        public override int GetHashCode()
+        {
+            return this.text.GetHashCode();
         }
 
         public class Entity

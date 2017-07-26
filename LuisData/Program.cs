@@ -6,6 +6,8 @@ using System.Linq;
 
 namespace GenerateLuisData
 {
+    using System.Text;
+
     public class Program
     {
         private static void Main(string[] args)
@@ -34,36 +36,37 @@ namespace GenerateLuisData
             public static List<string> All = new List<string> { Contact, Book, Movie };
         }
 
-        private static class Noise
+        private enum Noise
         {
-            public static string Preface = "preface";
-            public static string Middle = "middle";
-            public static string Trailer = "trailer";
+            Preface,
+            Middle,
+            Trailer,
+            Intent,
+            Entity
         }
 
-        private static class Patterns
-        {
-            public static string IntentEntity = "{intent} {entity}";
-            public static string IntentEntityTrailer = "{intent} {entity} {trailer}";
-            public static string PrefaceIntentEntity = "{preface} {intent} {entity}";
-            public static string PrefaceIntentEntityTrailer = "{preface} {intent} {entity} {trailer}";
-            public static string IntentMiddleEntity = "{intent} {middle} {entity}";
-            public static string IntentMiddleEntityTrailer = "{intent} {middle} {entity} {trailer}";
-            public static string PrefaceIntentMiddleEntity = "{preface} {intent} {middle} {entity}";
-            public static string PrefaceIntentMiddleEntityTrailer = "{preface} {intent} {middle} {entity} {trailer}";
 
-            public static List<string> All = new List<string>
+        private static IDictionary<string, List<Noise>> patterns = new Dictionary<string, List<Noise>>
             {
-                IntentEntity,
-                IntentEntityTrailer,
-                PrefaceIntentEntity,
-                PrefaceIntentEntityTrailer,
-                IntentMiddleEntity,
-                IntentMiddleEntityTrailer,
-                PrefaceIntentMiddleEntity,
-                PrefaceIntentMiddleEntityTrailer
+                { "{intent} {entity}", new List<Noise>() {Noise.Intent, Noise.Entity} },
+                { "{entity} {intent}", new List<Noise>() {Noise.Entity, Noise.Intent} },
+                { "{intent} {entity} {trailer}", new List<Noise>() { Noise.Intent, Noise.Entity, Noise.Trailer } },
+                { "{preface} {intent} {entity}", new List<Noise>() {Noise.Preface, Noise.Intent, Noise.Entity} },
+                { "{preface} {intent} {entity} {trailer}", new List<Noise>() { Noise.Preface, Noise.Intent, Noise.Entity, Noise.Trailer } },
+                { "{intent} {middle} {entity}", new List<Noise>() { Noise.Intent, Noise.Middle, Noise.Entity } },
+                { "{intent} {middle} {entity} {trailer}", new List<Noise>() { Noise.Intent, Noise.Middle, Noise.Entity, Noise.Trailer } },
+                { "{preface} {entity} {middle} {intent}", new List<Noise>() { Noise.Preface, Noise.Entity, Noise.Middle, Noise.Intent } },
+                { "{preface} {intent} {middle} {entity}", new List<Noise>() { Noise.Preface, Noise.Intent, Noise.Middle, Noise.Entity } },
+                { "{preface} {intent} {middle} {entity} {trailer}", new List<Noise>() {Noise.Preface, Noise.Intent, Noise.Middle, Noise.Entity, Noise.Trailer} }
             };
-        }
+
+
+        private static IDictionary<Noise, List<string>> noiseMap = new Dictionary<Noise, List<string>>
+                                                                    {
+                                                                            { Noise.Preface, new List<string>() { "make", "do", "finish", "set", "complete", "start", "continue" } },
+                                                                            { Noise.Middle, new List<string>() { "to", "with", "by", "along", "for" } },
+                                                                            { Noise.Trailer, new List<string>() { "again", "tomorrow", "today", "first", "last" } }
+                                                                    };
 
         private class IntentSynonyms : Dictionary<string, string> { }
 
@@ -72,42 +75,13 @@ namespace GenerateLuisData
             var intentSynonyms = new IntentSynonyms
             {
                 { "call", Intents.Call },
-                { "dial", Intents.Call },
+                { "phone", Intents.Call },
                 { "email", Intents.Message },
                 { "message", Intents.Message },
                 { "read", Intents.Read },
                 { "research", Intents.Read },
                 { "watch", Intents.Watch },
                 { "see", Intents.Watch }
-            };
-
-            var noise = new Dictionary<string, string>
-            {
-                { "Make", Noise.Preface },
-                { "Do", Noise.Preface },
-                { "Finish", Noise.Preface },
-                { "Set", Noise.Preface },
-                { "Complete", Noise.Preface },
-                { "Start", Noise.Preface },
-                { "Continue", Noise.Preface },
-                { "Make first", Noise.Preface },
-                { "Do lots of", Noise.Preface },
-                { "Prepare finish", Noise.Preface },
-                { "Set this ", Noise.Preface },
-                { "Complete next", Noise.Preface },
-                { "Start second iteration", Noise.Preface },
-                { "Put more effort into", Noise.Preface },
-
-                {"to", Noise.Middle },
-                {"with", Noise.Middle },
-                {"by", Noise.Middle },
-                {"with", Noise.Middle },
-                {"together with", Noise.Middle },
-
-                { "again", Noise.Trailer },
-                { "tomorrow", Noise.Trailer },
-                { "today", Noise.Trailer },
-                { "first", Noise.Trailer },
             };
 
             var names = GetNames();
@@ -164,6 +138,12 @@ namespace GenerateLuisData
             var watch = CreateUtterances(synonyms, Intents.Watch, movies, Entities.Movie);
             var read = CreateUtterances(synonyms, Intents.Read, books, Entities.Book);
 
+            var numUtterances = 10000 / Intents.All.Count;
+            call = pickRandom(call.ToList(), Math.Min(numUtterances, call.Count()));
+            message = pickRandom(message.ToList(), Math.Min(numUtterances, message.Count()));
+            watch = pickRandom(watch.ToList(), Math.Min(numUtterances, watch.Count()));
+            read = pickRandom(read.ToList(), Math.Min(numUtterances, read.Count()));
+        
             var utterances = new List<Utterance>();
             utterances.AddRange(call);
             utterances.AddRange(message);
@@ -174,14 +154,60 @@ namespace GenerateLuisData
 
         private static IEnumerable<Utterance> CreateUtterances(IntentSynonyms synonyms, string intentId, IEnumerable<string> entities, string entityType)
         {
+            //var temp = string.Format("{0} {1}", new string[] { "hi", "hello" });
             var pairs = synonyms.Where(pair => pair.Value == intentId);
             foreach (var p in pairs)
             {
                 foreach (var e in entities)
                 {
-                    yield return Utterance.Create(p.Value, p.Key, e, entityType);
+                    foreach (var pattern in Program.patterns.Keys)
+                    {
+                        var text = createTextFromPattern(pattern, Program.patterns[pattern], p.Key, e);
+                        yield return Utterance.Create(text, p.Value, p.Key, e, entityType);
+                    }
                 }
             }
+        }//TODO: spoof the intent name a little bit on some
+
+        private static string createTextFromPattern(string patternFormat, List<Noise> noises, string intent, string entity)
+        {
+            var noiseMap = Program.noiseMap;
+            var stringList = new List<string>();
+            foreach (var curNoise in noises)
+            {
+                if (curNoise == Noise.Intent)
+                {
+                    stringList.Add(intent);
+                } else if (curNoise == Noise.Entity)
+                {
+                    stringList.Add(entity);
+                }
+                else
+                {
+                    var possibleNoises = noiseMap[curNoise];
+                    stringList.Add(pickRandom(possibleNoises));
+                }
+            }
+
+            return string.Join(" ", stringList);
+        }
+
+        private static List<T> pickRandom<T>(List<T> collection, int count)
+        {
+            var list = new List<T>();
+            for (var i = 0; i < count; i++)
+            {
+                var element = pickRandom(collection);
+                list.Add(element);
+                collection.Remove(element);
+            }
+            return list;
+        }
+
+        private static T pickRandom<T>(IEnumerable<T> collection)
+        {
+            var rand = new Random();
+            return collection.ElementAt(rand.Next(0, collection.Count()));
         }
 
         private static FileStream OpenFile(LuisDoc doc)

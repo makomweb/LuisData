@@ -51,6 +51,7 @@
     <Compile Include="Entity.cs" />
     <Compile Include="Intent.cs" />
     <Compile Include="LuisDoc.cs" />
+    <Compile Include="PartOptionCombination.cs" />
     <Compile Include="PatternTests.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -11,7 +11,7 @@ namespace GenerateLuisData
         public void Run()
         {
             var parts = new List<Program.Part>() { Program.Part.Preface, Program.Part.Intent, Program.Part.Middle, Program.Part.Entity, Program.Part.Trailer };
-            var combinations = Program.CreateCombinations(parts);
+            var combinations = Program.PartOptionCombination.FromParts(parts);
             Assert.IsNotNull(combinations);
             foreach (var c in combinations)
             {

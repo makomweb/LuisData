@@ -1,0 +1,45 @@
+﻿{
+    "query": "call micha about meeting",
+    "topScoringIntent": {
+        "intent": "call",
+        "score": 0.9999881
+    },
+    "intents": [
+      {
+        "intent": "call",
+        "score": 0.9999881
+      },
+        {
+            "intent": "read",
+            "score": 6.641599e-7
+        },
+        {
+            "intent": "None",
+            "score": 4.67343881e-7
+        },
+        {
+            "intent": "watch",
+            "score": 4.11418739e-7
+        },
+        {
+            "intent": "message",
+            "score": 2.47904978e-7
+        }
+    ],
+    "entities": [
+        {
+            "entity": "micha",
+            "type": "contact",
+            "startIndex": 5,
+            "endIndex": 9,
+            "score": 0.764911354
+        },
+        {
+            "entity": "about",
+            "type": "contact",
+            "startIndex": 11,
+            "endIndex": 15,
+            "score": 0.5691926
+        }
+    ]
+}
